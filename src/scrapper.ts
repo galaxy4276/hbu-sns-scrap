@@ -1,6 +1,4 @@
-import { Browser, ElementHandle, LaunchOptions, Locator, Page, chromium } from "@playwright/test";
-import { chatUtils } from "./chatgpt";
-import { prompt } from "./prompt";
+import { Browser, ElementHandle, LaunchOptions, Page, chromium } from "@playwright/test";
 import { optimizeImageForGPT } from "./utils/imageProcessor";
 import tesseract from "tesseract.js";
 import { Article } from "./db";
