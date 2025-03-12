@@ -1,0 +1,34 @@
+{
+  "name": "hbu_bread",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "ts-node index.ts",
+    "start": "ts-node index.ts",
+    "build": "tsc --outDir dist",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.51.0",
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^22.13.9",
+    "cross-env": "^7.0.3",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.758.0",
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/lib-dynamodb": "^3.758.0",
+    "aws-lambda": "^1.0.7",
+    "dotenv": "^16.4.7",
+    "dynamoose": "^4.0.3",
+    "openai": "^4.86.2",
+    "sharp": "^0.33.5",
+    "tesseract.js": "^6.0.0",
+    "typescript": "^5.8.2"
+  }
+}
