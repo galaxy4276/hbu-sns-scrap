@@ -3,8 +3,10 @@ import { optimizeImageForGPT } from "./utils/imageProcessor";
 import tesseract from "tesseract.js";
 import { Article } from "./db";
 import { uploadToS3 } from "./utils/s3";
+import { launchChromium } from 'playwright-aws-lambda';
 
 const FIRST_PAGE = 'https://www.hanbat.ac.kr/bbs/BBSMSTR_000000000050/list.do?mno=sub07_01';
+const BASE_URL = 'https://www.hanbat.ac.kr/bbs/BBSMSTR_000000000050/view.do?nttId=';
 
 const checkExistsTitle = async (title: string) => {
   const article = await Article.query('title').eq(title).using('TitleIndex').exec();
@@ -36,7 +38,7 @@ const getDetailPageContent = async (page: Page, detailId: string) => {
   }, detailId);
   await page.waitForLoadState('networkidle');
   await page.waitForSelector('.ui.bbs--view--tit', { state: 'visible' });
-  const title = await page.locator('.ui.bbs--view--tit').textContent() as string;
+  const title = (await page.locator('.ui.bbs--view--tit').textContent() as string).replace(/[\t\n]/g, '').trim();
   console.log('새 페이지 제목:', title);
 
   const content = await page.locator('#contens');
@@ -63,14 +65,16 @@ const processDetailContent = async (shotBuffer: Buffer) => {
 };
 
 export const scrap = async (launchOptions: LaunchOptions) => {
-  const browser = await chromium.launch(launchOptions);
+  const browser = process.env.AWS_LAMBDA_FUNCTION_VERSION
+    ? await launchChromium(launchOptions)
+    : await chromium.launch(launchOptions);
   const page = await browser.newPage();
   
   try {
     await page.goto(FIRST_PAGE, { waitUntil: 'networkidle' });
     
     const titleLinks = (await page.$$('td[data-cell-header="제목"] a')).slice(2);
-    // const titleLinks = (await page.$$('td[data-cell-header="제목"] a')).slice(0, 1);
+    // const titleLinks = [(await page.$$('td[data-cell-header="제목"] a'))[3]];
     const results = await Promise.allSettled(
       titleLinks.map(async (link) => {
         const newPage = await openNewPage(browser);
@@ -79,6 +83,8 @@ export const scrap = async (launchOptions: LaunchOptions) => {
           return;
         }
         const content = await getDetailPageContent(newPage, id);
+        const originUrl = `${BASE_URL}${id}`;
+        console.log({ id, ...content, originUrl });
         const exists = await checkExistsTitle(content.title);
         if (exists) {
           return;
@@ -89,8 +95,9 @@ export const scrap = async (launchOptions: LaunchOptions) => {
           id: id,
           title: content.title,
           content: text,
-          imageUrl: imageUrl,
-          uploaded: false
+          imageUrl,
+          uploaded: false,
+          originUrl,
         });
         return true;
       })

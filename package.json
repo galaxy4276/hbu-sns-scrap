@@ -27,6 +27,8 @@
     "dotenv": "^16.4.7",
     "dynamoose": "^4.0.3",
     "openai": "^4.86.2",
+    "playwright-aws-lambda": "^0.11.0",
+    "playwright-core": "^1.51.0",
     "sharp": "^0.33.5",
     "tesseract.js": "^6.0.0",
     "typescript": "^5.8.2"

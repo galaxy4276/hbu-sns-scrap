@@ -23,6 +23,7 @@ export const articleSchema = new dynamoose.Schema({
       type: 'global',
     },
   },
+  originUrl: String,
   content: String,
   imageUrl: String,
   uploaded: Boolean,
